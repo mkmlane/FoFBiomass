@@ -46,8 +46,9 @@ def main():
     args = parser.parse_args()
 
     crops = load_crop_codes()
+    admin_cols = ["ADM0_NAME", "ADM1_NAME", "ADM2_NAME"]
     print(f"Loading {args.input} ...")
-    df = pd.read_csv(args.input, usecols=["x", "y"] + crops)
+    df = pd.read_csv(args.input, usecols=["x", "y"] + admin_cols + crops)
     print(f"Loaded {len(df)} rows")
 
     out_path = Path(args.output)
@@ -65,6 +66,10 @@ def main():
                     props[code] = round(val, args.decimals)
             if not props:
                 continue
+            for col in admin_cols:
+                val = getattr(row, col)
+                if isinstance(val, str) and val:
+                    props[col] = val
             feature = {
                 "type": "Feature",
                 "properties": props,

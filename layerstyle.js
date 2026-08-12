@@ -100,18 +100,15 @@ export function productionStyleFn(selectedItemIds) {
   };
 }
 
-export function updateLegend(selectedItemIds) {
+function legendTitleText(selectedItemIds) {
   const names = [...selectedItemIds].map(itemName);
-  let title;
-  if (names.length === 0) {
-    title = 'Nothing selected';
-  } else if (names.length > 4) {
-    title = `Total — ${names.length} Biomass Types (metric tons)`;
-  } else {
-    title = `Total — ${names.join(', ')} (metric tons)`;
-  }
+  if (names.length === 0) return 'Nothing selected';
+  if (names.length > 4) return `Total — ${names.length} Biomass Types (metric tons)`;
+  return `Total — ${names.join(', ')} (metric tons)`;
+}
 
-  document.getElementById('legend-title').textContent = title;
+export function updateLegend(selectedItemIds) {
+  document.getElementById('legend-title').textContent = legendTitleText(selectedItemIds);
   document.getElementById('legend-min').textContent = productionRange.min.toLocaleString();
 
   const maxInput = document.getElementById('legend-max-input');
@@ -121,4 +118,19 @@ export function updateLegend(selectedItemIds) {
 
   const gradientDiv = document.getElementById('legend-gradient');
   gradientDiv.style.background = `linear-gradient(to right, ${productionRamp.join(',')})`;
+}
+
+// Read-only mirror of the main legend for secondary maps (e.g. the test
+// case page), targeting elements named `${idPrefix}-title/min/max/gradient`.
+export function updateSimpleLegend(idPrefix, selectedItemIds) {
+  const title = document.getElementById(`${idPrefix}-title`);
+  const min = document.getElementById(`${idPrefix}-min`);
+  const max = document.getElementById(`${idPrefix}-max`);
+  const gradient = document.getElementById(`${idPrefix}-gradient`);
+  if (!title || !min || !max || !gradient) return;
+
+  title.textContent = legendTitleText(selectedItemIds);
+  min.textContent = productionRange.min.toLocaleString();
+  max.textContent = productionRange.max.toLocaleString();
+  gradient.style.background = `linear-gradient(to right, ${productionRamp.join(',')})`;
 }

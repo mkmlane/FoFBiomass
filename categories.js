@@ -15,6 +15,11 @@ import crops from './crops.json';
 // yet).
 const RPR = { rice: 1.757, whea: 1.75, maiz: 1.0 };
 
+// Only a fraction of total residue produced is actually removable — the
+// rest needs to stay on the field for soil health (erosion control,
+// organic matter, nutrient cycling). 30% removal / 70% left on field.
+const REMOVAL_RATE = 0.3;
+
 export const categories = [
   {
     id: 'crops',
@@ -27,22 +32,22 @@ export const categories = [
   },
   {
     id: 'ag-residues',
-    label: 'Agricultural Residues',
+    label: 'Agricultural Residues (30% removed)',
     items: [
       {
         id: 'wheat-straw',
         name: 'Wheat Straw',
-        getValue: (feature) => (feature.get('whea') || 0) * RPR.whea,
+        getValue: (feature) => (feature.get('whea') || 0) * RPR.whea * REMOVAL_RATE,
       },
       {
         id: 'rice-straw',
         name: 'Rice Straw',
-        getValue: (feature) => (feature.get('rice') || 0) * RPR.rice,
+        getValue: (feature) => (feature.get('rice') || 0) * RPR.rice * REMOVAL_RATE,
       },
       {
         id: 'corn-stover',
         name: 'Corn Stover',
-        getValue: (feature) => (feature.get('maiz') || 0) * RPR.maiz,
+        getValue: (feature) => (feature.get('maiz') || 0) * RPR.maiz * REMOVAL_RATE,
       },
     ],
   },
