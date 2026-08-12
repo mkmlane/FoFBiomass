@@ -16,8 +16,12 @@ export const productionRamp = colormap({
 });
 
 // Mutable range, recalculated whenever the crop selection changes so the
-// color ramp reflects the totals for whatever is currently checked.
-export const productionRange = { min: 0, max: 1 };
+// color ramp reflects the totals for whatever is currently checked. When
+// `auto` is true, max is recomputed from the data on every refresh; when
+// the user sets a custom max (e.g. because the auto power-of-10 scale is
+// too high to show contrast in their region of interest), `auto` flips to
+// false and the manual value sticks until they reset it.
+export const productionRange = { min: 0, max: 1, auto: true };
 
 // Snap the max up to the next power of 10 (1e6, 1e7, ...) instead of an
 // arbitrary number like 1,004,430, so the legend reads cleanly and doesn't
@@ -28,8 +32,19 @@ function nextPowerOfTen(value) {
 
 export function recalculateRange(source, selectedItemIds) {
   productionRange.min = 0;
+  if (!productionRange.auto) return;
   const rawMax = getMaxSelectedTotal(source, selectedItemIds) || 1;
   productionRange.max = nextPowerOfTen(rawMax);
+}
+
+export function setUserMax(value) {
+  if (!Number.isFinite(value) || value <= 0) return;
+  productionRange.max = value;
+  productionRange.auto = false;
+}
+
+export function resetAutoMax() {
+  productionRange.auto = true;
 }
 
 // SPAM2020 pixels are 5 arc-minutes (~10km at the equator) on a side. Each
@@ -39,25 +54,32 @@ export function recalculateRange(source, selectedItemIds) {
 // OpenLayers on load, so the box has to be built in lon/lat degrees (where
 // the cell size is uniform) and then reprojected corner-by-corner, rather
 // than offsetting the projected coordinates directly.
-const CELL_SIZE_DEG = 5 / 60;
-const HALF_CELL = CELL_SIZE_DEG / 2;
+export const NATIVE_CELL_SIZE_DEG = 5 / 60;
+
+// Aggregated (user-resolution) features carry their own cell size via the
+// '_cellSizeDeg' property (see aggregate.js); native SPAM features don't
+// have that property, so they fall back to the native pixel size.
+function cellSizeDegOf(feature) {
+  return feature.get('_cellSizeDeg') || NATIVE_CELL_SIZE_DEG;
+}
 
 // Building each box means round-tripping through lon/lat and reprojecting 5
 // corners, which is too expensive to redo on every render frame (pan/zoom)
-// across ~980k features. Cache the computed polygon per feature so that
-// cost is paid once, not on every repaint.
+// across hundreds of thousands of features. Cache the computed polygon per
+// feature so that cost is paid once, not on every repaint.
 const cellGeometryCache = new WeakMap();
 
 function cellPolygon(feature) {
   let polygon = cellGeometryCache.get(feature);
   if (!polygon) {
+    const halfCell = cellSizeDegOf(feature) / 2;
     const [lon, lat] = toLonLat(feature.getGeometry().getCoordinates());
     const corners = [
-      [lon - HALF_CELL, lat - HALF_CELL],
-      [lon + HALF_CELL, lat - HALF_CELL],
-      [lon + HALF_CELL, lat + HALF_CELL],
-      [lon - HALF_CELL, lat + HALF_CELL],
-      [lon - HALF_CELL, lat - HALF_CELL],
+      [lon - halfCell, lat - halfCell],
+      [lon + halfCell, lat - halfCell],
+      [lon + halfCell, lat + halfCell],
+      [lon - halfCell, lat + halfCell],
+      [lon - halfCell, lat - halfCell],
     ].map((corner) => fromLonLat(corner));
     polygon = new Polygon([corners]);
     cellGeometryCache.set(feature, polygon);
@@ -91,7 +113,11 @@ export function updateLegend(selectedItemIds) {
 
   document.getElementById('legend-title').textContent = title;
   document.getElementById('legend-min').textContent = productionRange.min.toLocaleString();
-  document.getElementById('legend-max').textContent = productionRange.max.toLocaleString();
+
+  const maxInput = document.getElementById('legend-max-input');
+  if (document.activeElement !== maxInput) {
+    maxInput.value = productionRange.max;
+  }
 
   const gradientDiv = document.getElementById('legend-gradient');
   gradientDiv.style.background = `linear-gradient(to right, ${productionRamp.join(',')})`;

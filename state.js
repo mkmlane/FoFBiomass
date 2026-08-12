@@ -5,7 +5,7 @@ import { categories } from './categories.js';
 // so the map just sums whatever's checked regardless of which category it
 // came from.
 const state = {
-  selectedItems: new Set(categories.find((c) => c.id === 'crops').items.map((i) => i.id)),
+  selectedItems: new Set(['corn-stover']),
 };
 
 export function getSelectedItems() {

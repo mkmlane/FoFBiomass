@@ -1,8 +1,10 @@
 // Update this file if adding extra user interface functionality
 
+import VectorSource from 'ol/source/Vector.js';
+import crops from './crops.json';
 import { categories } from './categories.js';
-import { createMap, createVectorLayer, spamSource, boundaryBaseLayer } from './map.js';
-import { productionStyleFn, recalculateRange, updateLegend } from './layerstyle.js';
+import { createMap, createVectorLayer, spamSource, boundaryBaseLayer, stateProvinceLayer } from './map.js';
+import { productionStyleFn, recalculateRange, updateLegend, setUserMax, resetAutoMax } from './layerstyle.js';
 import {
   getSelectedItems,
   setItemSelected,
@@ -10,12 +12,17 @@ import {
   setAllItems,
   categoryCheckState,
 } from './state.js';
+import { degFromValue, valueFromDeg, clampResolutionDeg, aggregateFeatures, isNativeResolution } from './aggregate.js';
+
+const cropCodes = crops.map((c) => c.code);
 
 window.addEventListener('DOMContentLoaded', () => {
   const map = createMap();
 
   const productionLayer = createVectorLayer(productionStyleFn(getSelectedItems()));
-  map.setLayers([boundaryBaseLayer, productionLayer]);
+  map.setLayers([boundaryBaseLayer, stateProvinceLayer, productionLayer]);
+
+  let currentSource = spamSource;
 
   const container = document.getElementById('crop-checkboxes');
   const categoryCheckboxes = new Map(); // category.id -> checkbox element
@@ -97,13 +104,55 @@ window.addEventListener('DOMContentLoaded', () => {
     refresh();
   });
 
+  const resolutionValueInput = document.getElementById('resolution-value');
+  const resolutionUnitSelect = document.getElementById('resolution-unit');
+
+  function applyResolution() {
+    if (spamSource.getFeatures().length === 0) return; // native data not loaded yet
+
+    const rawValue = parseFloat(resolutionValueInput.value);
+    if (!Number.isFinite(rawValue)) return;
+
+    const unit = resolutionUnitSelect.value;
+    const requestedDeg = degFromValue(rawValue, unit);
+    const clampedDeg = clampResolutionDeg(requestedDeg);
+    resolutionValueInput.value = Math.round(valueFromDeg(clampedDeg, unit) * 100) / 100;
+
+    if (isNativeResolution(clampedDeg)) {
+      currentSource = spamSource;
+    } else {
+      const aggregated = aggregateFeatures(spamSource.getFeatures(), clampedDeg, cropCodes);
+      currentSource = new VectorSource({ features: aggregated });
+    }
+    productionLayer.setSource(currentSource);
+  }
+
+  document.getElementById('apply-resolution').addEventListener('click', () => {
+    applyResolution();
+    refresh();
+  });
+
   function refresh() {
     const selected = getSelectedItems();
-    recalculateRange(spamSource, selected);
+    recalculateRange(currentSource, selected);
     productionLayer.setStyle(productionStyleFn(selected));
     updateLegend(selected);
   }
 
+  document.getElementById('legend-max-input').addEventListener('change', (e) => {
+    setUserMax(parseFloat(e.target.value));
+    refresh();
+  });
+
+  document.getElementById('legend-max-reset').addEventListener('click', () => {
+    resetAutoMax();
+    refresh();
+  });
+
   syncCheckboxes();
-  spamSource.on('featuresloadend', refresh);
+  spamSource.on('featuresloadend', () => {
+    applyResolution();
+    setUserMax(1000000);
+    refresh();
+  });
 });

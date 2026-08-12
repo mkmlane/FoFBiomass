@@ -94,6 +94,43 @@
         margin-top: 6px;
         padding-left: 8px;
       }
+
+      #resolution-control {
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ccc;
+        font-size: 13px;
+      }
+
+      #resolution-control label {
+        font-weight: bold;
+      }
+
+      #resolution-control input[type="number"] {
+        width: 60px;
+      }
+
+      #resolution-note {
+        font-weight: normal;
+        color: #777;
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .info-icon {
+        cursor: help;
+        color: #666;
+        border: 1px solid #999;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: normal;
+        margin-left: 4px;
+      }
     </style>
     <link rel="icon" href="/favicon.ico" />
   </head>
@@ -103,13 +140,30 @@
     <div id="legend">
       <div id="legend-title" style="font-weight:bold; margin-bottom:4px; font-size: 20px;"></div>
       <div id="legend-gradient" style="height:20px; margin:4px 0;"></div>
-      <div style="display:flex; justify-content:space-between;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <span id="legend-min"></span>
-        <span id="legend-max"></span>
+        <span style="display:flex; align-items:center; gap:4px;">
+          <button type="button" id="legend-max-reset" title="Reset to automatic scaling">&#8635;</button>
+          <input type="number" id="legend-max-input" min="0" step="any" style="width:110px;" title="Enter a custom color bar max. Useful when the automatic power-of-10 scale is too high to show contrast in your area of interest.">
+        </span>
       </div>
     </div>
 
     <div id="controls">
+      <div id="resolution-control">
+        <label for="resolution-value">
+          Grid Resolution
+          <span class="info-icon" title="Aggregates production/residue values into coarser grid cells before plotting, by summing the underlying 5 arc-min SPAM2020 pixels within each cell. Enter a value in arc-minutes or km. Minimum is 5 arc-min (~9.3 km) — the native SPAM2020 resolution, so you can't go finer. Maximum is 100 km, a practical upper limit for economically shipping biomass to a biorefinery. (km-to-degree conversion uses an equatorial approximation, so actual cell size drifts slightly at high latitudes.)">&#9432;</span>
+        </label>
+        <br>
+        <input type="number" id="resolution-value" value="30" step="0.1" min="0">
+        <select id="resolution-unit">
+          <option value="arcmin">arc-min</option>
+          <option value="km">km</option>
+        </select>
+        <button type="button" id="apply-resolution">Apply</button>
+        <div id="resolution-note">Native: 5 arc-min (~9.3 km)</div>
+      </div>
       <div id="select-all-controls">
         <button type="button" id="select-all-crops">Select all</button>
         <button type="button" id="select-no-crops">Select none</button>

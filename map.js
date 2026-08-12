@@ -32,11 +32,33 @@ export function createCountryBoundaryLayer() {
 
 export const boundaryBaseLayer = createCountryBoundaryLayer();
 
+// Natural Earth admin-1 (states/provinces), same family as the country
+// outlines above but styled lighter/thinner so it doesn't compete visually
+// with country borders or the crop-cell shading drawn on top of it.
+const stateProvinceStyle = new Style({
+  fill: new Fill({ color: '#ffffff00' }),
+  stroke: new Stroke({ color: '#c2b9ac', width: 0.4 }),
+});
+
+export function createStateProvinceLayer() {
+  return new VectorLayer({
+    source: new VectorSource({
+      url: '/data/states_provinces.geojson',
+      format: new GeoJSON(),
+    }),
+    style: stateProvinceStyle,
+    background: '#ffffff00',
+    minZoom: 3,
+  });
+}
+
+export const stateProvinceLayer = createStateProvinceLayer();
+
 export function createMap() {
   const map = new Map({
     target: 'map-container',
     view: new View({ center: [0, 0], zoom: 2 }),
-    layers: [boundaryBaseLayer],
+    layers: [boundaryBaseLayer, stateProvinceLayer],
     controls: defaultControls().extend([
       new ZoomToExtent({
         label: '⌂',
@@ -48,9 +70,9 @@ export function createMap() {
   return map;
 }
 
-export function createVectorLayer(styleFn) {
+export function createVectorLayer(styleFn, source = spamSource) {
   return new VectorLayer({
-    source: spamSource,
+    source,
     style: styleFn,
   });
 }
