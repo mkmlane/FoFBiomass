@@ -1,0 +1,18 @@
+[
+  { "code": "whea", "name": "Wheat" },
+  { "code": "rice", "name": "Rice" },
+  { "code": "maiz", "name": "Corn" },
+  { "code": "barl", "name": "Barley" },
+  { "code": "sorg", "name": "Sorghum" },
+  { "code": "ocer", "name": "Other Cereals" },
+  { "code": "cass", "name": "Cassava" },
+  { "code": "soyb", "name": "Soybean" },
+  { "code": "grou", "name": "Groundnut" },
+  { "code": "cnut", "name": "Coconut" },
+  { "code": "oilp", "name": "Oilpalm" },
+  { "code": "sunf", "name": "Sunflower" },
+  { "code": "rape", "name": "Rapeseed" },
+  { "code": "ooil", "name": "Other Oil Crops" },
+  { "code": "sugc", "name": "Sugarcane" },
+  { "code": "sugb", "name": "Sugarbeet" }
+]

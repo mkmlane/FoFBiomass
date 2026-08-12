@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>FoFBiomass</title>
+    <style>
+      @import "node_modules/ol/ol.css";
+    </style>
+    <style>
+      html, body, #map-container {
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 1000;
+        font-family: sans-serif;
+        background-color: #ffffff;
+      }
+
+      #legend {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 6px;
+        border: 6px solid #aaaaaa00;
+        width: 400px;
+      }
+
+      #controls {
+        position: absolute;
+        bottom: 30px;
+        right: 20px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 8px;
+        width: 280px;
+        max-height: 60vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+
+      #crop-checkboxes {
+        margin-bottom: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+
+      #crop-checkboxes label {
+        font-size: 13px;
+        white-space: nowrap;
+      }
+
+      .category {
+        margin-bottom: 6px;
+      }
+
+      .category-header {
+        font-weight: bold;
+      }
+
+      .category-note {
+        font-weight: normal;
+        font-style: italic;
+        color: #999;
+      }
+
+      .category-items {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 12px;
+        margin: 2px 0 2px 20px;
+      }
+
+      #select-all-controls {
+        margin-bottom: 8px;
+      }
+
+      .legacy-controls {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid #ccc;
+        color: #999;
+      }
+
+      .legacy-controls label {
+        color: #999;
+      }
+
+      #pyrolysis-extra {
+        display: none;
+        margin-top: 6px;
+        padding-left: 8px;
+      }
+    </style>
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body>
+    <div id="map-container"></div>
+
+    <div id="legend">
+      <div id="legend-title" style="font-weight:bold; margin-bottom:4px; font-size: 20px;"></div>
+      <div id="legend-gradient" style="height:20px; margin:4px 0;"></div>
+      <div style="display:flex; justify-content:space-between;">
+        <span id="legend-min"></span>
+        <span id="legend-max"></span>
+      </div>
+    </div>
+
+    <div id="controls">
+      <div id="select-all-controls">
+        <button type="button" id="select-all-crops">Select all</button>
+        <button type="button" id="select-no-crops">Select none</button>
+      </div>
+      <div id="crop-checkboxes"></div>
+
+      <div class="legacy-controls">
+        <select id="visualization" disabled>
+          <option value="total-residue">Total Residue</option>
+          <option value="total-production">Total Production</option>
+        </select>
+        <br>
+        <label>
+          <input type="checkbox" id="display-transportation" disabled>
+          Display transportation range
+        </label>
+        <br>
+        <label>
+          <input type="checkbox" id="pyrolysis-options" disabled>
+          Enable additional options
+        </label>
+        <div id="pyrolysis-extra">
+          <label>
+            Biochar usage:
+            <select id="biochar-usage" disabled>
+              <option value="storage">storage</option>
+              <option value="electricity">electricity</option>
+            </select>
+          </label>
+          <br>
+          <label>
+            Bio-oil usage:
+            <select id="biooil-usage" disabled>
+              <option value="transportation fuel">transportation fuel</option>
+              <option value="storage">storage</option>
+            </select>
+          </label>
+          <br>
+          <label>
+            <input type="checkbox" id="include-ccs" disabled>
+            Use CCS
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+
+    <div id="attribution-banner" style="
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3000;
+      font-family: sans-serif;
+      font-size: 13px;
+    ">
+      <div id="attribution-expanded" style="
+        display: none;
+        background: white;
+        border-top: 1px solid #cccccc;
+        padding: 16px 20px;
+        max-height: 300px;
+        overflow-y: auto;
+      ">
+        <strong style="font-size: 15px;">About FoFBiomass</strong>
+        <p style="margin: 8px 0; color: #555;">
+          Crop production data is from the <a href="https://www.mapspam.info/data/" target="_blank">SPAM2020 V2r2</a> dataset (all technologies).
+        </p>
+      </div>
+      <div id="attribution-bar" onclick="toggleAttribution()" style="
+        background: white;
+        border-top: 1px solid #cccccc;
+        padding: 6px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+      ">
+        <span>FoFBiomass</span>
+        <span id="attribution-arrow" style="font-size: 16px; transition: transform 0.2s;">&#9650;</span>
+      </div>
+    </div>
+
+    <script>
+      function toggleAttribution() {
+        const expanded = document.getElementById('attribution-expanded');
+        const arrow = document.getElementById('attribution-arrow');
+        const isOpen = expanded.style.display === 'block';
+        expanded.style.display = isOpen ? 'none' : 'block';
+        arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+      }
+    </script>
+  </body>
+</html>
