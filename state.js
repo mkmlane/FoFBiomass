@@ -1,9 +1,9 @@
 import { categories } from './categories.js';
 
-// Selection is tracked by item id across all categories (crop codes for
-// the Crops category, e.g. 'wheat-straw' for Agricultural Residues, etc.)
-// so the map just sums whatever's checked regardless of which category it
-// came from.
+// Selection is tracked by item id across all categories (e.g. 'wheat-straw'
+// for Crop Residues, 'sugarcane' for Sugar & Starch, etc.) so the map just
+// sums whatever's checked regardless of which category it came from.
+// Items marked `pending` (no dataset connected yet) are never selectable.
 const state = {
   selectedItems: new Set(['corn-stover']),
 };
@@ -22,19 +22,21 @@ export function setItemSelected(id, selected) {
 
 export function setCategorySelected(category, selected) {
   for (const item of category.items) {
+    if (item.pending) continue;
     setItemSelected(item.id, selected);
   }
 }
 
 export function setAllItems(selected) {
-  const allIds = categories.flatMap((c) => c.items.map((i) => i.id));
+  const allIds = categories.flatMap((c) => c.items.filter((i) => !i.pending).map((i) => i.id));
   state.selectedItems = selected ? new Set(allIds) : new Set();
 }
 
 export function categoryCheckState(category) {
-  if (category.items.length === 0) return 'disabled';
-  const checkedCount = category.items.filter((i) => state.selectedItems.has(i.id)).length;
+  const selectableItems = category.items.filter((i) => !i.pending);
+  if (selectableItems.length === 0) return 'disabled';
+  const checkedCount = selectableItems.filter((i) => state.selectedItems.has(i.id)).length;
   if (checkedCount === 0) return 'unchecked';
-  if (checkedCount === category.items.length) return 'checked';
+  if (checkedCount === selectableItems.length) return 'checked';
   return 'indeterminate';
 }

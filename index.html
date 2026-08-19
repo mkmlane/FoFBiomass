@@ -98,7 +98,7 @@
         z-index: 1000;
         background: rgba(255, 255, 255, 0.9);
         padding: 8px;
-        width: 280px;
+        width: 320px;
         max-height: 60vh;
         overflow-y: auto;
         overflow-x: hidden;
@@ -115,7 +115,26 @@
 
       #crop-checkboxes label {
         font-size: 13px;
-        white-space: nowrap;
+        white-space: normal;
+      }
+
+      #totals-label {
+        font-size: 11px;
+        color: #999;
+        text-align: right;
+        margin-bottom: 4px;
+      }
+
+      .category-group-header {
+        font-weight: bold;
+        font-size: 15px;
+        margin: 12px 0 4px 0;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .category-group-header:first-child {
+        margin-top: 0;
       }
 
       .category {
@@ -125,19 +144,34 @@
       #crop-checkboxes .category-header {
         font-weight: bold;
         white-space: normal;
+        cursor: pointer;
+        user-select: none;
       }
 
-      .category-note {
+      .category-toggle {
+        display: inline-block;
+        width: 10px;
         font-weight: normal;
-        font-style: italic;
-        color: #999;
+        color: #777;
       }
 
       .category-items {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 2px 12px;
         margin: 2px 0 2px 20px;
+      }
+
+      .category-items.collapsed {
+        display: none;
+      }
+
+      .item-total {
+        color: #999;
+      }
+
+      #crop-checkboxes input:disabled + .item-total {
+        color: #ccc;
       }
 
       #select-all-controls {
@@ -159,6 +193,23 @@
         display: none;
         margin-top: 6px;
         padding-left: 8px;
+      }
+
+      #display-mode-control {
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ccc;
+        font-size: 13px;
+      }
+
+      #display-mode-control label {
+        font-weight: bold;
+      }
+
+      #display-mode {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 2px;
       }
 
       #resolution-control {
@@ -390,6 +441,14 @@
     </div>
 
     <div id="controls">
+      <div id="display-mode-control">
+        <label for="display-mode">Map Data</label>
+        <br>
+        <select id="display-mode">
+          <option value="production">Production (metric tons)</option>
+          <option value="yield">Yields (kg/ha)</option>
+        </select>
+      </div>
       <div id="resolution-control">
         <label for="resolution-value">
           Grid Resolution
@@ -408,6 +467,7 @@
         <button type="button" id="select-all-crops">Select all</button>
         <button type="button" id="select-no-crops">Select none</button>
       </div>
+      <div id="totals-label">(total global amount, Gt)</div>
       <div id="crop-checkboxes"></div>
 
       <div class="legacy-controls" style="display:none;">

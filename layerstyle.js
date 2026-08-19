@@ -30,10 +30,10 @@ function nextPowerOfTen(value) {
   return Math.pow(10, Math.ceil(Math.log10(value) - 1e-9));
 }
 
-export function recalculateRange(source, selectedItemIds) {
+export function recalculateRange(source, selectedItemIds, mode = 'production') {
   productionRange.min = 0;
   if (!productionRange.auto) return;
-  const rawMax = getMaxSelectedTotal(source, selectedItemIds) || 1;
+  const rawMax = getMaxSelectedTotal(source, selectedItemIds, mode) || 1;
   productionRange.max = nextPowerOfTen(rawMax);
 }
 
@@ -87,9 +87,9 @@ function cellPolygon(feature) {
   return polygon;
 }
 
-export function productionStyleFn(selectedItemIds) {
+export function productionStyleFn(selectedItemIds, mode = 'production') {
   return function (feature) {
-    const value = getSelectedTotal(feature, selectedItemIds);
+    const value = getSelectedTotal(feature, selectedItemIds, mode);
     if (value <= 0) return null;
     const color = getColor(value, productionRange.min, productionRange.max, productionRamp);
     if (!color) return null;
@@ -100,15 +100,17 @@ export function productionStyleFn(selectedItemIds) {
   };
 }
 
-function legendTitleText(selectedItemIds) {
+function legendTitleText(selectedItemIds, mode = 'production') {
   const names = [...selectedItemIds].map(itemName);
+  const label = mode === 'yield' ? 'Yields' : 'Production';
+  const unit = mode === 'yield' ? 'kg/ha' : 'metric tons';
   if (names.length === 0) return 'Nothing selected';
-  if (names.length > 4) return `Total — ${names.length} Biomass Types (metric tons)`;
-  return `Total — ${names.join(', ')} (metric tons)`;
+  if (names.length > 4) return `${label} — ${names.length} Biomass Types (${unit})`;
+  return `${label} — ${names.join(', ')} (${unit})`;
 }
 
-export function updateLegend(selectedItemIds) {
-  document.getElementById('legend-title').textContent = legendTitleText(selectedItemIds);
+export function updateLegend(selectedItemIds, mode = 'production') {
+  document.getElementById('legend-title').textContent = legendTitleText(selectedItemIds, mode);
   document.getElementById('legend-min').textContent = productionRange.min.toLocaleString();
 
   const maxInput = document.getElementById('legend-max-input');
@@ -122,14 +124,14 @@ export function updateLegend(selectedItemIds) {
 
 // Read-only mirror of the main legend for secondary maps (e.g. the test
 // case page), targeting elements named `${idPrefix}-title/min/max/gradient`.
-export function updateSimpleLegend(idPrefix, selectedItemIds) {
+export function updateSimpleLegend(idPrefix, selectedItemIds, mode = 'production') {
   const title = document.getElementById(`${idPrefix}-title`);
   const min = document.getElementById(`${idPrefix}-min`);
   const max = document.getElementById(`${idPrefix}-max`);
   const gradient = document.getElementById(`${idPrefix}-gradient`);
   if (!title || !min || !max || !gradient) return;
 
-  title.textContent = legendTitleText(selectedItemIds);
+  title.textContent = legendTitleText(selectedItemIds, mode);
   min.textContent = productionRange.min.toLocaleString();
   max.textContent = productionRange.max.toLocaleString();
   gradient.style.background = `linear-gradient(to right, ${productionRamp.join(',')})`;

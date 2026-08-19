@@ -2,7 +2,7 @@
 
 import VectorSource from 'ol/source/Vector.js';
 import crops from './crops.json';
-import { categories } from './categories.js';
+import { categories, residueResultCodes, yieldHaCodes } from './categories.js';
 import { createMap, createVectorLayer, spamSource, boundaryBaseLayer, stateProvinceLayer } from './map.js';
 import { productionStyleFn, recalculateRange, updateLegend, updateSimpleLegend, setUserMax, resetAutoMax } from './layerstyle.js';
 import {
@@ -17,7 +17,11 @@ import { createTestCaseMap, totalWithinRadius, renderResults, renderFuelProducti
 import { renderSupplyCurve } from './results.js';
 import { renderWaterfallChart, dummyLcaStages, dummyEconStages } from './waterfall.js';
 
-const cropCodes = crops.map((c) => c.code);
+// Grid resampling (aggregate.js) sums whatever crop columns it's given into
+// coarser cells, so the precomputed residue columns (`{code}_res`) and the
+// harvested-area columns (`{code}_ha`, needed for "Yields" mode) need to
+// ride along with the raw crop codes to survive resampling.
+const cropCodes = crops.map((c) => c.code).concat(residueResultCodes).concat(yieldHaCodes);
 
 window.addEventListener('DOMContentLoaded', () => {
   const map = createMap();
@@ -27,20 +31,58 @@ window.addEventListener('DOMContentLoaded', () => {
 
   let currentSource = spamSource;
   let testCase = null; // lazily created once the Test Case page is first shown
+  let displayMode = 'production'; // 'production' | 'yield', toggled by #display-mode
 
   const container = document.getElementById('crop-checkboxes');
   const categoryCheckboxes = new Map(); // category.id -> checkbox element
   const itemCheckboxes = new Map(); // item.id -> checkbox element
 
+  let currentGroup = null;
   categories.forEach((category) => {
+    if (category.group !== currentGroup) {
+      currentGroup = category.group;
+      const groupHeader = document.createElement('div');
+      groupHeader.className = 'category-group-header';
+      groupHeader.textContent = currentGroup;
+      container.appendChild(groupHeader);
+    }
+
+    const selectableItems = category.items.filter((i) => !i.pending);
+
     const section = document.createElement('div');
     section.className = 'category';
 
-    const header = document.createElement('label');
+    const itemsDiv = document.createElement('div');
+    itemsDiv.className = 'category-items collapsed';
+    category.items.forEach((item) => {
+      const label = document.createElement('label');
+      if (item.note) label.title = item.note;
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      if (item.pending) input.disabled = true;
+      input.addEventListener('change', () => {
+        setItemSelected(item.id, input.checked);
+        syncCheckboxes();
+        refresh();
+      });
+      label.appendChild(input);
+      label.append(` ${item.name} `);
+      const total = document.createElement('span');
+      total.className = 'item-total';
+      total.textContent = item.pending ? '()' : `(${item.globalAmountGt} Gt)`;
+      label.appendChild(total);
+      itemsDiv.appendChild(label);
+      itemCheckboxes.set(item.id, input);
+    });
+
+    // A <div> rather than <label> here, on purpose: a <label> would forward
+    // any click (including on the name text) to the wrapped checkbox, which
+    // would fight with using that same click to expand/collapse the section.
+    const header = document.createElement('div');
     header.className = 'category-header';
     const categoryInput = document.createElement('input');
     categoryInput.type = 'checkbox';
-    if (category.items.length === 0) {
+    if (selectableItems.length === 0) {
       categoryInput.disabled = true;
     }
     categoryInput.addEventListener('change', () => {
@@ -49,36 +91,22 @@ window.addEventListener('DOMContentLoaded', () => {
       refresh();
     });
     header.appendChild(categoryInput);
+
+    const toggleArrow = document.createElement('span');
+    toggleArrow.className = 'category-toggle';
+    toggleArrow.textContent = '▸';
+    header.appendChild(toggleArrow);
+
     header.append(` ${category.label}`);
-    if (category.items.length === 0) {
-      const note = document.createElement('span');
-      note.className = 'category-note';
-      note.textContent = ' (dataset pending)';
-      header.appendChild(note);
-    }
+    header.addEventListener('click', (e) => {
+      if (e.target === categoryInput) return;
+      const collapsed = itemsDiv.classList.toggle('collapsed');
+      toggleArrow.textContent = collapsed ? '▸' : '▾';
+    });
     section.appendChild(header);
     categoryCheckboxes.set(category.id, categoryInput);
 
-    if (category.items.length > 0) {
-      const itemsDiv = document.createElement('div');
-      itemsDiv.className = 'category-items';
-      category.items.forEach((item) => {
-        const label = document.createElement('label');
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.addEventListener('change', () => {
-          setItemSelected(item.id, input.checked);
-          syncCheckboxes();
-          refresh();
-        });
-        label.appendChild(input);
-        label.append(` ${item.name}`);
-        itemsDiv.appendChild(label);
-        itemCheckboxes.set(item.id, input);
-      });
-      section.appendChild(itemsDiv);
-    }
-
+    section.appendChild(itemsDiv);
     container.appendChild(section);
   });
 
@@ -129,7 +157,7 @@ window.addEventListener('DOMContentLoaded', () => {
       currentSource = new VectorSource({ features: aggregated });
     }
     productionLayer.setSource(currentSource);
-    if (testCase) testCase.updateProductionLayer(currentSource, productionStyleFn(getSelectedItems()));
+    if (testCase) testCase.updateProductionLayer(currentSource, productionStyleFn(getSelectedItems(), displayMode));
   }
 
   document.getElementById('apply-resolution').addEventListener('click', () => {
@@ -137,13 +165,19 @@ window.addEventListener('DOMContentLoaded', () => {
     refresh();
   });
 
+  document.getElementById('display-mode').addEventListener('change', (e) => {
+    displayMode = e.target.value;
+    resetAutoMax();
+    refresh();
+  });
+
   function refresh() {
     const selected = getSelectedItems();
-    recalculateRange(currentSource, selected);
-    productionLayer.setStyle(productionStyleFn(selected));
-    updateLegend(selected);
-    updateSimpleLegend('testcase-legend', selected);
-    if (testCase) testCase.updateProductionLayer(currentSource, productionStyleFn(selected));
+    recalculateRange(currentSource, selected, displayMode);
+    productionLayer.setStyle(productionStyleFn(selected, displayMode));
+    updateLegend(selected, displayMode);
+    updateSimpleLegend('testcase-legend', selected, displayMode);
+    if (testCase) testCase.updateProductionLayer(currentSource, productionStyleFn(selected, displayMode));
   }
 
   document.getElementById('legend-max-input').addEventListener('change', (e) => {
@@ -237,7 +271,7 @@ window.addEventListener('DOMContentLoaded', () => {
             runTestCaseCalculation();
           },
           currentSource,
-          productionStyleFn(getSelectedItems())
+          productionStyleFn(getSelectedItems(), displayMode)
         );
       } else {
         testCase.map.updateSize();

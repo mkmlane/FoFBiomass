@@ -1,13 +1,17 @@
 import { allItems } from './categories.js';
 
-// Sum values (metric tons) across the given set of selected item ids for
-// one feature. Each item (crop or derived residue) knows how to compute
-// its own value from the feature.
-export function getSelectedTotal(feature, selectedItemIds) {
+// Sum values across the given set of selected item ids for one feature.
+// mode 'production' sums each item's tonnage (getValue); mode 'yield' sums
+// each item's underlying crop yield in kg/ha (getYieldValue) instead —
+// meaningful for a single selected crop, and just an additive convention
+// (matching how 'production' already combines unrelated feedstocks) when
+// more than one item is checked at once.
+export function getSelectedTotal(feature, selectedItemIds, mode = 'production') {
   let total = 0;
   for (const id of selectedItemIds) {
     const item = allItems.find((i) => i.id === id);
-    if (item) total += item.getValue(feature);
+    if (!item) continue;
+    total += mode === 'yield' ? item.getYieldValue(feature) : item.getValue(feature);
   }
   return total;
 }
@@ -15,10 +19,10 @@ export function getSelectedTotal(feature, selectedItemIds) {
 // Max total across all features for the current selection. Used to scale
 // the legend/color ramp to the active selection instead of a fixed range,
 // since totals vary a lot depending on what's checked.
-export function getMaxSelectedTotal(source, selectedItemIds) {
+export function getMaxSelectedTotal(source, selectedItemIds, mode = 'production') {
   let max = 0;
   for (const feature of source.getFeatures()) {
-    const value = getSelectedTotal(feature, selectedItemIds);
+    const value = getSelectedTotal(feature, selectedItemIds, mode);
     if (value > max) max = value;
   }
   return max;
