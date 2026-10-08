@@ -22,7 +22,15 @@ Everything else in the checkbox tree is a disabled placeholder with no dataset y
 
 ## How the data are processed
 
-All preprocessing is in `scripts/process_spam.py`, which merges three SPAM CSVs (production, yield and harvested area) on `grid_code` and writes the GeoJSON. The raw CSVs are not in the repo; download them from the [SPAM2020 Harvard Dataverse](https://doi.org/10.7910/DVN/SWPENT).
+All preprocessing is in `scripts/process_spam.py`, which merges three SPAM CSVs (production, yield and harvested area) on `grid_code` and writes the GeoJSON. The three raw CSVs are in `data/raw/` (Git LFS, about 1.3 GB in total), unmodified from the [SPAM2020 Harvard Dataverse](https://doi.org/10.7910/DVN/SWPENT):
+
+| File | Contents | Unit |
+|---|---|---|
+| `spam2020V2r2_global_P_TA.csv` | Production, all technologies | metric tons |
+| `spam2020V2r2_global_Y_TA.csv` | Yield, all technologies | kg/ha |
+| `spam2020V2r2_global_H_TA.csv` | Harvested area, all technologies | ha |
+
+`data/raw/Readme_SPAM2020V2r2.txt` is the SPAM readme, with the crop code list and the data citation. The script's default input paths point to a local folder, so pass `--input`, `--yield-input` and `--harvested-area-input` to run it against `data/raw/`.
 
 - **Residue:** computed per cell with a yield-dependent residue-to-product ratio, RPR = a·exp(−b·Y), where Y is yield in t/ha. Residue is production × RPR. Above Y = 1/b, residue per hectare is held constant at a/(b·e).
 - **Removal rate:** the app multiplies residue by a flat 30% everywhere (`REMOVAL_RATE` in `categories.js`); the other 70% is assumed to stay on the field.
