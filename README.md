@@ -16,3 +16,13 @@
 - **Value shown:** the sum of all checked items in that cell, in tons per cell
 - **Resolution:** the map opens at 30 arc-min, but `aggregate.js` sums into coarser bins from 5 arc-min
 - **Yield mode:** shows summed production divided by summed harvested area, in kg/ha
+
+## Deploying
+
+The Netlify site (https://fofbiomass-mkml.netlify.app) is not linked to GitHub, so pushing does not update it. To publish:
+
+```
+npm run deploy
+```
+
+This builds the app and uploads `dist/` to Netlify production. The first run asks you to log in to Netlify if this computer isn't logged in yet. Netlify only uploads files that changed, so the 300 MB map file goes up only when it is regenerated.

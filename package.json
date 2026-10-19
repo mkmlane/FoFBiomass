@@ -23,11 +23,13 @@
     "test": "npm run lint",
     "start": "vite serve",
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "deploy": "vite build && netlify deploy --prod --dir dist --site 4defc561-4922-47b5-bd57-41708771051b"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-config-openlayers": "^19.0.0",
+    "netlify-cli": "^17.38.1",
     "vite": "^7.2.2"
   }
 }
