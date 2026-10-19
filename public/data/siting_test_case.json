@@ -3,36 +3,50 @@
   "generated": "2026-10-19",
   "data": "SPAM 2020 V2r0",
   "inputs": {
+    "scenario": "test_case",
+    "feedstock": "Corn Stover",
     "crop": "maiz",
-    "country": "United States of America",
+    "country": "USA",
     "region": "Iowa",
+    "aez": "AEZ-10",
     "capacity_t_per_day": 2000.0,
     "capacity_factor": 0.9,
     "removal_rate": 0.3,
-    "loss_rate": 0.1,
+    "harvesting_loss": 0.05,
+    "storage_loss": 0.1,
+    "loss_rate": 0.15000000000000002,
+    "participation_ratio": 1,
     "residue_params": {
       "a": 2.656,
       "b": 0.103
     },
     "residue_params_source": "Citation pending"
   },
+  "model_inputs": {
+    "retrievable_yield_t_ha": 2.418743126784637,
+    "retrievable_yield_sd_t_ha": 0.004762216478161969,
+    "cultivated_area_ha": 271628.67884750746,
+    "total_area_ha": 558977.3566885217,
+    "site_aez": "AEZ-10"
+  },
   "result": {
     "x": -94.2083,
     "y": 43.4583,
     "grid_code": 2411589,
     "location": "Kossuth, Iowa, United States of America",
-    "radius_km": 41.0689250548146,
+    "radius_km": 42.181514764982005,
     "annual_demand_t": 657000.0,
-    "catchment_cells": 86,
-    "grain_production_t": 3725048.006674732,
-    "gross_residue_t": 2433333.3333333344,
+    "catchment_cells": 91,
+    "grain_production_t": 3960563.1098072883,
+    "gross_residue_t": 2576470.588235295,
     "available_residue_t": 657000.0000000002,
-    "harvested_area_ha": 256548.41919587174,
-    "total_area_ha": 529878.7999893004,
-    "land_ratio": 0.4841643394698035,
-    "average_residue_yield_t_ha": 9.484889211012883,
-    "mean_haul_distance_km": 27.118330461747888,
-    "share_from_outside_region": 0.46099843708663857,
+    "harvested_area_ha": 271628.67884750746,
+    "total_area_ha": 558977.3566885217,
+    "land_ratio": 0.4859386084199951,
+    "average_residue_yield_t_ha": 9.485267163861321,
+    "residue_yield_sd_t_ha": 0.018675358737890075,
+    "mean_haul_distance_km": 27.92955755705877,
+    "share_from_outside_region": 0.4737965046393809,
     "catchment_within_loaded_data": true,
     "candidates_evaluated": 2281,
     "top_candidates": [
@@ -40,61 +54,61 @@
         "x": -94.2083,
         "y": 43.4583,
         "location": "Kossuth, Iowa, United States of America",
-        "radius_km": 41.0689250548146
+        "radius_km": 42.181514764982005
       },
       {
         "x": -94.125,
         "y": 43.4583,
         "location": "Kossuth, Iowa, United States of America",
-        "radius_km": 41.24603752080952
+        "radius_km": 42.18728675651588
       },
       {
         "x": -94.0417,
         "y": 43.4583,
         "location": "Kossuth, Iowa, United States of America",
-        "radius_km": 41.34689464659149
+        "radius_km": 42.19138828173283
       },
       {
         "x": -94.2917,
         "y": 43.4583,
         "location": "Kossuth, Iowa, United States of America",
-        "radius_km": 41.38140864897938
+        "radius_km": 42.196236696570566
       },
       {
         "x": -93.9583,
         "y": 43.4583,
         "location": "Winnebago, Iowa, United States of America",
-        "radius_km": 41.381408648979644
-      },
-      {
-        "x": -94.375,
-        "y": 43.4583,
-        "location": "Kossuth, Iowa, United States of America",
-        "radius_km": 41.38140864898015
-      },
-      {
-        "x": -95.7917,
-        "y": 43.4583,
-        "location": "Osceola, Iowa, United States of America",
-        "radius_km": 41.38817196932979
-      },
-      {
-        "x": -95.7083,
-        "y": 43.4583,
-        "location": "Osceola, Iowa, United States of America",
-        "radius_km": 41.40479825566009
-      },
-      {
-        "x": -95.875,
-        "y": 43.4583,
-        "location": "Lyon, Iowa, United States of America",
-        "radius_km": 41.411981832684255
+        "radius_km": 42.21266025694393
       },
       {
         "x": -93.875,
         "y": 43.4583,
         "location": "Winnebago, Iowa, United States of America",
-        "radius_km": 41.42280777266297
+        "radius_km": 42.224937760099074
+      },
+      {
+        "x": -95.875,
+        "y": 43.4583,
+        "location": "Lyon, Iowa, United States of America",
+        "radius_km": 42.224937760099074
+      },
+      {
+        "x": -95.7083,
+        "y": 43.4583,
+        "location": "Osceola, Iowa, United States of America",
+        "radius_km": 42.224937760099074
+      },
+      {
+        "x": -94.375,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 42.22493776009932
+      },
+      {
+        "x": -95.7917,
+        "y": 43.4583,
+        "location": "Osceola, Iowa, United States of America",
+        "radius_km": 42.22493776009934
       }
     ]
   }
