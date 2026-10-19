@@ -290,6 +290,23 @@
         padding: 6px;
       }
 
+      #testcase-load-model {
+        margin-top: 10px;
+        width: 100%;
+        padding: 6px;
+      }
+
+      #testcase-model table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
+      #testcase-model td {
+        padding: 2px 4px;
+      }
+
       #testcase-results {
         margin-top: 12px;
         padding-top: 8px;
@@ -421,7 +438,7 @@
     <div id="about-panel" class="hidden">
       <h3>About FoFBiomass</h3>
       <p>
-        Crop production data is from the <a href="https://www.mapspam.info/data/" target="_blank">SPAM2020 V2r2</a> dataset (all technologies).
+        Crop production data is from the <a href="https://www.mapspam.info/data/" target="_blank">SPAM2020 V2r0</a> dataset (all technologies).
       </p>
     </div>
 
@@ -521,6 +538,8 @@
           <span id="testcase-legend-min"></span>
           <span id="testcase-legend-max"></span>
         </div>
+        <button type="button" id="testcase-load-model">Load FoF model test case</button>
+        <div id="testcase-model"></div>
         <label for="testcase-lat">Latitude
           <input type="number" id="testcase-lat" step="any" min="-90" max="90">
         </label>

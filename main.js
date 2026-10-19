@@ -13,7 +13,7 @@ import {
   categoryCheckState,
 } from './state.js';
 import { degFromValue, valueFromDeg, clampResolutionDeg, aggregateFeatures, isNativeResolution } from './aggregate.js';
-import { createTestCaseMap, totalWithinRadius, renderResults, renderFuelProduction, locationLabel } from './testcase.js';
+import { createTestCaseMap, totalWithinRadius, renderResults, renderFuelProduction, locationLabel, loadModelTestCase, renderModelTestCase } from './testcase.js';
 import { renderSupplyCurve } from './results.js';
 import { renderWaterfallChart, dummyLcaStages, dummyEconStages } from './waterfall.js';
 
@@ -249,6 +249,24 @@ window.addEventListener('DOMContentLoaded', () => {
     lastTestCaseTotals = totals;
   }
 
+  // Shows the FoF model's siting result (scripts/run_siting.py in FoF_Spiros)
+  // and draws its site and catchment radius with the same calculation as a
+  // manual pick, so the map and the model show the same circle.
+  async function showModelTestCase() {
+    const modelContainer = document.getElementById('testcase-model');
+    try {
+      const data = await loadModelTestCase();
+      renderModelTestCase(modelContainer, data);
+      latInput.value = data.result.y.toFixed(4);
+      lonInput.value = data.result.x.toFixed(4);
+      radiusInput.value = data.result.radius_km.toFixed(1);
+      runTestCaseCalculation();
+      testCase.zoomToRadius(data.result.x, data.result.y, data.result.radius_km);
+    } catch (err) {
+      modelContainer.innerHTML = `<p class="field-note">Could not load the FoF model test case (${err.message}).</p>`;
+    }
+  }
+
   function renderResultsPage() {
     const price = parseFloat(resultsPriceInput.value);
     if (!lastTestCaseTotals) {
@@ -291,6 +309,7 @@ window.addEventListener('DOMContentLoaded', () => {
   navButtons.waterfall.addEventListener('click', () => showPage('waterfall'));
   navButtons.results.addEventListener('click', () => showPage('results'));
   document.getElementById('testcase-calculate').addEventListener('click', runTestCaseCalculation);
+  document.getElementById('testcase-load-model').addEventListener('click', showModelTestCase);
   resultsPriceInput.addEventListener('change', renderResultsPage);
 
   document.getElementById('nav-about').addEventListener('click', () => {

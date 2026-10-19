@@ -1,0 +1,101 @@
+{
+  "description": "Biorefinery siting test case: smallest catchment radius that meets annual demand",
+  "generated": "2026-10-19",
+  "data": "SPAM 2020 V2r0",
+  "inputs": {
+    "crop": "maiz",
+    "country": "United States of America",
+    "region": "Iowa",
+    "capacity_t_per_day": 2000.0,
+    "capacity_factor": 0.9,
+    "removal_rate": 0.3,
+    "loss_rate": 0.1,
+    "residue_params": {
+      "a": 2.656,
+      "b": 0.103
+    },
+    "residue_params_source": "Citation pending"
+  },
+  "result": {
+    "x": -94.2083,
+    "y": 43.4583,
+    "grid_code": 2411589,
+    "location": "Kossuth, Iowa, United States of America",
+    "radius_km": 41.0689250548146,
+    "annual_demand_t": 657000.0,
+    "catchment_cells": 86,
+    "grain_production_t": 3725048.006674732,
+    "gross_residue_t": 2433333.3333333344,
+    "available_residue_t": 657000.0000000002,
+    "harvested_area_ha": 256548.41919587174,
+    "total_area_ha": 529878.7999893004,
+    "land_ratio": 0.4841643394698035,
+    "average_residue_yield_t_ha": 9.484889211012883,
+    "mean_haul_distance_km": 27.118330461747888,
+    "share_from_outside_region": 0.46099843708663857,
+    "catchment_within_loaded_data": true,
+    "candidates_evaluated": 2281,
+    "top_candidates": [
+      {
+        "x": -94.2083,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 41.0689250548146
+      },
+      {
+        "x": -94.125,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 41.24603752080952
+      },
+      {
+        "x": -94.0417,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 41.34689464659149
+      },
+      {
+        "x": -94.2917,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 41.38140864897938
+      },
+      {
+        "x": -93.9583,
+        "y": 43.4583,
+        "location": "Winnebago, Iowa, United States of America",
+        "radius_km": 41.381408648979644
+      },
+      {
+        "x": -94.375,
+        "y": 43.4583,
+        "location": "Kossuth, Iowa, United States of America",
+        "radius_km": 41.38140864898015
+      },
+      {
+        "x": -95.7917,
+        "y": 43.4583,
+        "location": "Osceola, Iowa, United States of America",
+        "radius_km": 41.38817196932979
+      },
+      {
+        "x": -95.7083,
+        "y": 43.4583,
+        "location": "Osceola, Iowa, United States of America",
+        "radius_km": 41.40479825566009
+      },
+      {
+        "x": -95.875,
+        "y": 43.4583,
+        "location": "Lyon, Iowa, United States of America",
+        "radius_km": 41.411981832684255
+      },
+      {
+        "x": -93.875,
+        "y": 43.4583,
+        "location": "Winnebago, Iowa, United States of America",
+        "radius_km": 41.42280777266297
+      }
+    ]
+  }
+}

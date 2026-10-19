@@ -135,12 +135,17 @@ export function createTestCaseMap(onPick, productionSource, productionStyleFn) {
     radiusSource.addFeature(new Feature(new CircleGeom(center, radiusKm * 1000)));
   }
 
+  function zoomToRadius(lon, lat, radiusKm) {
+    const circle = new CircleGeom(fromLonLat([lon, lat]), radiusKm * 1000);
+    map.getView().fit(circle.getExtent(), { padding: [80, 360, 80, 80], duration: 500 });
+  }
+
   function updateProductionLayer(source, styleFn) {
     productionLayer.setSource(source);
     productionLayer.setStyle(styleFn);
   }
 
-  return { map, setMarker, setRadiusCircle, updateProductionLayer };
+  return { map, setMarker, setRadiusCircle, zoomToRadius, updateProductionLayer };
 }
 
 export function renderResults(container, totals, pointCount, radiusKm) {
@@ -173,5 +178,40 @@ export function renderFuelProduction(container) {
       <span>N/A</span>
     </div>
     <p class="field-note">Pending the conversion pathway energy model.</p>
+  `;
+}
+
+// FoF model siting result, written by scripts/run_siting.py in the
+// FoF_Spiros repository: the site whose catchment radius is smallest while
+// still meeting the plant's annual demand.
+export async function loadModelTestCase() {
+  const response = await fetch('/data/siting_test_case.json');
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+export function renderModelTestCase(container, data) {
+  const { inputs, result } = data;
+  const fmt = (value, digits = 0) => value.toLocaleString(undefined, { maximumFractionDigits: digits });
+  const rows = [
+    ['Site', result.location],
+    ['Radius', `${fmt(result.radius_km, 1)} km`],
+    ['Annual demand', `${fmt(result.annual_demand_t)} t/yr`],
+    ['Avg residue yield', `${fmt(result.average_residue_yield_t_ha, 2)} t/ha`],
+    ['Land ratio', fmt(result.land_ratio, 3)],
+    ['Mean haul (straight line)', `${fmt(result.mean_haul_distance_km, 1)} km`],
+    [`From outside ${inputs.region}`, `${fmt(result.share_from_outside_region * 100, 1)}%`],
+  ]
+    .map(([label, value]) => `<tr><td>${label}</td><td style="text-align:right;">${value}</td></tr>`)
+    .join('');
+
+  container.innerHTML = `
+    <table>${rows}</table>
+    <p class="field-note">
+      ${fmt(inputs.capacity_t_per_day)} t/day plant, capacity factor ${inputs.capacity_factor},
+      ${fmt(inputs.removal_rate * 100)}% removal, ${fmt(inputs.loss_rate * 100)}% losses
+      (${data.data}, generated ${data.generated}). The totals below use the Map page's
+      checked items and exclude losses, so they run higher than the demand.
+    </p>
   `;
 }

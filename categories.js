@@ -5,35 +5,36 @@
 // caring whether an item is a raw crop or a derived residue.
 //
 // Items backed by SPAM2020 report a globalAmountGt (the worldwide total for
-// that item, in gigatons, computed from the same SPAM2020 V2r2 all-technology
+// that item, in gigatons, computed from the same SPAM2020 V2r0 all-technology
 // data as the map — see crop_production_totals.csv). Items with no SPAM (or
 // derived) data yet are `pending: true` — their checkbox is disabled and the
 // UI shows "DP" (dataset pending) instead of a total.
 
 // Global production totals (metric tons), from crop_production_totals.csv
-// (SPAM2020 V2r2, all technologies).
+// (SPAM2020 V2r0, all technologies).
 const GLOBAL_PRODUCTION_TONS = {
-  maiz: 1168397153,
-  rice: 769917234,
-  whea: 763962321,
-  oilp: 414645955,
-  soyb: 354316074,
-  sugb: 268971940,
-  sugc: 1881854327,
-  rape: 72421468,
-  sorg: 58961902,
+  maiz: 1168374766,
+  rice: 769917331,
+  whea: 763893246,
+  oilp: 414654516,
+  soyb: 354700170,
+  sugb: 268843661,
+  sugc: 1881861548,
+  rape: 72135490,
+  sorg: 59025937,
 };
 
 // Crops with a yield-dependent residue ratio ("dynamic RPR": RPR(Y) = a *
 // exp(-b*Y), Y = yield in t/ha, capping out above the yield where that's
 // fully decayed) instead of a flat per-crop ratio. The per-pixel math
-// (production * yield -> residue tons) is precomputed in
+// (production * yield -> residue tons) is precomputed by FoF_Spiros
 // scripts/process_spam.py and shipped as a plain `{code}_res` property on
 // each feature, alongside production — that keeps it summable like any
 // other crop column, which matters because the app's grid-resampling
 // (aggregate.js) works by summing whatever crop columns it's given into
 // coarser cells; computing this from yield client-side wouldn't survive
-// that resampling. See process_spam.py for the a/b parameters and formula.
+// that resampling. The a/b parameters and formula live in FoF_Spiros,
+// FoF_first/biorefinery_model/data/feedstock/residue.py.
 const DYNAMIC_RESIDUE_CROPS = ['maiz', 'whea', 'rice', 'soyb'];
 export const residueResultCodes = DYNAMIC_RESIDUE_CROPS.map((c) => `${c}_res`);
 
@@ -44,13 +45,13 @@ const REMOVAL_RATE = 0.3;
 
 // Global removable-residue totals (i.e. already * REMOVAL_RATE, matching
 // what's actually shown/mapped), in gigatons — the sum of each `{code}_res`
-// property across every pixel in the SPAM2020 grid, computed in
+// property across every pixel in the SPAM2020 grid, printed by FoF_Spiros
 // scripts/process_spam.py.
 const GLOBAL_DYNAMIC_RESIDUE_GT = {
-  maiz: 0.4279,
-  whea: 0.2891,
+  maiz: 0.4266,
+  whea: 0.2889,
   rice: 0.3444,
-  soyb: 0.2327,
+  soyb: 0.2134,
 };
 
 // Format a metric-ton quantity as a gigaton string, e.g. 1168397153 -> "1.17".
@@ -60,7 +61,7 @@ function formatGt(tons) {
 }
 
 // Map "Yields" mode value (kg/ha) for a crop, from the production and
-// harvested-area properties process_spam.py attaches to every feature
+// harvested-area properties FoF_Spiros process_spam.py attaches to every feature
 // (`code` and `{code}_ha`). Both sum correctly when the app resamples
 // pixels into coarser cells, so production/harvestedArea there gives the
 // production-weighted average yield for the cell — summing yield itself
@@ -88,9 +89,9 @@ function spamItem(id, name, code, { factor = 1, note } = {}) {
 }
 
 // A crop residue item using the yield-dependent dynamic RPR. The residue
-// tonnage itself (production * yield -> tons, per pixel) is precomputed in
-// scripts/process_spam.py and read straight off the feature's `{code}_res`
-// property here.
+// tonnage itself (production * yield -> tons, per pixel) is precomputed by
+// FoF_Spiros scripts/process_spam.py and read straight off the feature's
+// `{code}_res` property here.
 function dynamicResidueItem(id, name, code) {
   return {
     id,
