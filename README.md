@@ -7,7 +7,7 @@
 - **Data processing:** `scripts/process_spam.py` in the [FoF_Spiros](https://github.com/mkmlane/FoF_Spiros) repository merges three SPAM CSVs (production, yield, harvested area) on `grid_code` and writes the GeoJSON here, so the app and the FoF model share the same data and RPR (see `scripts/README.md`)
 - **Residue:** from residue-to-product ratio equation, RPR = a·exp(−b·Y), with Y in t/ha. Above Y = 1/b, residue per hectare is held constant.
 - **Removal rate:** 30% everywhere (evolving assumption)
-- **Siting test case:** `public/data/siting_test_case.json`, from FoF_Spiros `scripts/run_siting.py`: the site with the smallest catchment radius that meets the plant's annual demand. Shown on the Test Case page with "Load FoF model test case".
+- **Siting test case:** `public/data/siting_test_case.json`, from FoF_Spiros `scripts/run_siting.py`: the site with the smallest catchment radius that meets the plant's annual demand. Shown on the Test Case page with "Load FoF Iowa Corn Stover Test Case".
 
 ## Plotting data
 

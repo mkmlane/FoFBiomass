@@ -129,15 +129,31 @@ export function createTestCaseMap(onPick, productionSource, productionStyleFn) {
     markerSource.addFeature(new Feature(new Point(fromLonLat([lon, lat]))));
   }
 
+  // Web Mercator stretches distances by 1/cos(latitude), so a ground distance
+  // in km is converted to map units before drawing or zooming. Without this,
+  // circles were drawn smaller than the radius used for the totals.
+  function mapUnits(km, lat) {
+    return (km * 1000) / Math.max(Math.cos(toRad(lat)), 0.01);
+  }
+
   function setRadiusCircle(lon, lat, radiusKm) {
     radiusSource.clear();
     const center = fromLonLat([lon, lat]);
-    radiusSource.addFeature(new Feature(new CircleGeom(center, radiusKm * 1000)));
+    radiusSource.addFeature(new Feature(new CircleGeom(center, mapUnits(radiusKm, lat))));
   }
 
+  // Centers on the site and shows about ZOOM_WIDTH_KM east-west (about half
+  // the contiguous US), so the catchment is seen in its regional context.
+  // radiusKm only widens the view if the catchment itself is larger.
+  const ZOOM_WIDTH_KM = 2250;
   function zoomToRadius(lon, lat, radiusKm) {
-    const circle = new CircleGeom(fromLonLat([lon, lat]), radiusKm * 1000);
-    map.getView().fit(circle.getExtent(), { padding: [80, 360, 80, 80], duration: 500 });
+    const [x, y] = fromLonLat([lon, lat]);
+    const halfWidth = mapUnits(Math.max(ZOOM_WIDTH_KM / 2, radiusKm * 1.5), lat);
+    const halfHeight = halfWidth / 2;
+    map.getView().fit([x - halfWidth, y - halfHeight, x + halfWidth, y + halfHeight], {
+      padding: [80, 360, 80, 80],
+      duration: 500,
+    });
   }
 
   function updateProductionLayer(source, styleFn) {
@@ -197,7 +213,9 @@ export function renderModelTestCase(container, data) {
     ['Site', result.location],
     ['Radius', `${fmt(result.radius_km, 1)} km`],
     ['Annual demand', `${fmt(result.annual_demand_t)} t/yr`],
-    ['Avg residue yield', `${fmt(result.average_residue_yield_t_ha, 2)} t/ha`],
+    ['Gross residue yield', `${fmt(result.average_residue_yield_t_ha, 2)} t/ha`],
+    // Retrievable = gross x removal rate x (1 - losses); this is the yield the FoF model uses.
+    ['Estimated retrievable yield', `${fmt(data.model_inputs.retrievable_yield_t_ha, 2)} t/ha`],
     ['Land ratio', fmt(result.land_ratio, 3)],
     ['Mean haul (straight line)', `${fmt(result.mean_haul_distance_km, 1)} km`],
     [`From outside ${inputs.region}`, `${fmt(result.share_from_outside_region * 100, 1)}%`],
